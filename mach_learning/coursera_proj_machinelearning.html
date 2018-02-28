@@ -186,7 +186,7 @@ confusionMatrix(rpart_pred, testing$classe)</code></pre>
 </div>
 <div id="model-2-random-forest-tree" class="section level2">
 <h2>Model 2: Random Forest Tree</h2>
-<p>The second was random forest model:</p>
+<p>The second was random forest model. I created 5 folds to train this model.</p>
 <pre class="r"><code>cluster &lt;- makeCluster(detectCores() - 1) # convention to leave 1 core for OS
 registerDoParallel(cluster)
 
@@ -194,8 +194,8 @@ fitControl &lt;- trainControl(method = &quot;cv&quot;,
                            number = 5,
                            allowParallel = TRUE)
 
-rf_modFit &lt;- train(classe~., data=traindata, method=&quot;rf&quot;, trControl=fitControl)
-rf_pred &lt;- predict(rf_modFit, testing)
+rf_modFit &lt;- train(classe~., data=traindata, method=&quot;rf&quot;, trControl=fitControl)</code></pre>
+<pre class="r"><code>rf_pred &lt;- predict(rf_modFit, testing)
 confusionMatrix(rf_pred, testing$classe)</code></pre>
 <pre><code>## Confusion Matrix and Statistics
 ## 
@@ -228,13 +228,7 @@ confusionMatrix(rf_pred, testing$classe)</code></pre>
 ## Detection Rate         0.2845   0.1935   0.1743   0.1635   0.1835
 ## Detection Prevalence   0.2845   0.1935   0.1748   0.1637   0.1835
 ## Balanced Accuracy      1.0000   1.0000   0.9998   0.9986   0.9994</code></pre>
-<p>These results give me 0.998 accuracy and so there’s no need to try other models. This is a good model to use.</p>
-<p>From there, we can validate our test data:</p>
-<pre class="r"><code>#setting up test data
-testdata &lt;- testing[,!c(grepl(&quot;X|user_name|raw_timestamp_*|cvtd_timestamp|kurtosis_*|skewness_*|max_*|min_*|amplitude_*|var_*|avg_*|stddev_*&quot;, names(testing)))]</code></pre>
-</div>
-<div id="out-of-sample-error" class="section level2">
-<h2>Out of Sample Error</h2>
+<p>These results give me 0.999 accuracy, which tells me that this is a good model to use. You can see from the statistics of the confusion matrix that the sensitivity and specificity are both very high.</p>
 </div>
 
 

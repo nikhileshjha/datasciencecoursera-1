@@ -49,7 +49,7 @@ From the confusion matrix, we can see that this sort of accuracy of 48% is clear
 
 ##Model 2: Random Forest Tree
 
-The second was random forest model: 
+The second was random forest model. I created 5 folds to train this model.
 ```{r rf_tree}
 cluster <- makeCluster(detectCores() - 1) # convention to leave 1 core for OS
 registerDoParallel(cluster)
