@@ -1,0 +1,70 @@
+---
+title: "Coursera Machine Learning Project"
+output: html_document
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(cache=TRUE)
+```
+
+##Setting Up the Data
+
+Looking at all the raw data I had, there were a lot of columns. Many of them had a lot of NA values, including many of the aggregation functions like kurtosis, skewness, max, min, amplitude, var, avg, stddev. So instead of trying to remove teh NA values, I just removed the entire column and used the raw data. 
+
+I split up the training data into the training data as well as a testing data set
+```{r data_setup}
+library(caret)
+trainimport <- read.csv("~/Desktop/pml-training.csv")
+testimport <- read.csv("~/Desktop/pml-testing.csv")
+
+inTrain <- createDataPartition(y=trainimport$classe, p=0.75, list=FALSE)
+training <- trainimport[inTrain,]
+testing <- trainimport[-inTrain,]
+dim(training)
+dim(testing)
+```
+
+##Cleaning the Data
+
+```{r cleandata}
+traindata <- training[,!c(grepl("X|user_name|raw_timestamp_*|cvtd_timestamp|kurtosis_*|skewness_*|max_*|min_*|amplitude_*|var_*|avg_*|stddev_*", names(training)))]
+```
+
+##Model 1: Classification Tree
+
+THe first was the classification tree:
+
+```{r classification_tree}
+
+rpart_modFit <- train(classe~., data=traindata, method="rpart")
+plot(rpart_modFit$finalModel, uniform=TRUE, main="Classification Tree")
+text(rpart_modFit$finalModel, use.n=TRUE, all=TRUE, cex=.8)
+
+rpart_pred <- predict(rpart_modFit, testing)
+confusionMatrix(rpart_pred, testing$classe)
+```
+
+From the confusion matrix, we can see that this sort of accuracy of 48% is clearly insufficient. 
+
+##Model 2: Random Forest Tree
+
+The second was random forest model: 
+```{r rf_tree}
+cluster <- makeCluster(detectCores() - 1) # convention to leave 1 core for OS
+registerDoParallel(cluster)
+
+fitControl <- trainControl(method = "cv",
+                           number = 5,
+                           allowParallel = TRUE)
+
+rf_modFit <- train(classe~., data=traindata, method="rf", trControl=fitControl)
+```
+
+```{r rf_pred}
+rf_pred <- predict(rf_modFit, testing)
+confusionMatrix(rf_pred, testing$classe)
+```
+
+These results give me 0.999 accuracy, which tells me that this is a good model to use. 
+You can see from the statistics of the confusion matrix that the sensitivity and specificity are both very high. 
